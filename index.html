@@ -168,6 +168,9 @@
   .ref th { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
   .ref td { font-variant-numeric: tabular-nums; }
   .ref tr:last-child td { border-bottom: 0; }
+  .lnk { color: var(--brand-ink); text-decoration: none; font-weight: 600; font-size: 12px; white-space: nowrap; }
+  .lnk:hover { text-decoration: underline; }
+  .de-actions { margin-top: 12px; }
   .pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 650; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
   .pill-good { background: var(--good-bg); color: var(--good-ink); }
   .pill-warn { background: var(--warn-bg); color: var(--warn); }
@@ -418,17 +421,17 @@
       </div>
       <div class="kpi" style="--accent:var(--good)">
         <div class="lbl">Sudah Submit SE</div>
-        <div class="val">0<small> / 27</small></div>
+        <div class="val">7<small> / 27</small></div>
         <div class="sub">DE sudah kirim kandidat</div>
       </div>
       <div class="kpi" style="--accent:var(--p-novia)">
         <div class="lbl">Total SE Terkumpul</div>
-        <div class="val">0<small> SE</small></div>
+        <div class="val">14<small> SE</small></div>
         <div class="sub">dari seluruh DE</div>
       </div>
       <div class="kpi" style="--accent:var(--warn)">
         <div class="lbl">Belum Submit</div>
-        <div class="val">27<small> DE</small></div>
+        <div class="val">20<small> DE</small></div>
         <div class="sub">perlu di-follow up</div>
       </div>
     </div>
@@ -441,7 +444,7 @@
 
     <div class="note">
       <span>💡</span>
-      <div><b>Cara kerja:</b> Daftar DE ini mengikuti 15 folder di Drive "PROGRAM REKRUTMEN SE 2026". Nama SE, produk, status &amp; catatan diisi lewat Google Sheet; tombol <b>Buka folder Drive DE</b> menuju folder tempat DE submit CV &amp; portofolio. Nama lengkap tiap DE bisa ditambahkan nanti supaya lebih mudah dibaca.</div>
+      <div><b>Cara kerja:</b> Daftar DE &amp; SE ini otomatis mengikuti folder di Drive "PROGRAM REKRUTMEN SE 2026". Tiap DE submit SE sebagai sub-folder (berisi CV &amp; portofolio) — klik DE untuk lihat SE-nya, lalu <b>Buka folder</b> untuk buka berkasnya. Update terakhir: 4 Agu 2026.</div>
     </div>
   </section>
 
@@ -471,8 +474,8 @@
     tt.textContent = next === 'dark' ? '☀️' : '🌙';
   });
 
-  /* ---------- DE list (15 folder DE dari Drive, belum ada SE) ---------- */
-  var DRIVE_ROOT = 'https://drive.google.com/drive/folders/19W1mORL4U5Tmge0s3OWZ7ep-t007Fhim';
+  /* ---------- DE list (27 folder DE dari Drive) ---------- */
+  var FBASE = 'https://drive.google.com/drive/folders/';
   var deIds = [
     'ALDIALFIAN1205','ALFARIZI1363','ALTHAF1809','ANDIKRNAWAN1468','APDINAAW1292',
     'ASAD1682','AZZAMABDUL1647','DAUS1615','DAYAT1216','DENNI1259',
@@ -482,9 +485,51 @@
     'WAHIDIN1521','ZAINAL1022'
   ];
   var SELF = 'ZAINAL1022';
+  /* ID folder Drive tiap DE */
+  var DE_FOLDER = {
+    'ALDIALFIAN1205':'1xfDKRIhlseglaxDd0TggWM0HWC9EUfhp','ALFARIZI1363':'1U-H6UpGCF6CVZtZ_evxNlzUnZc26R56c',
+    'ALTHAF1809':'1vQn2oT4OtJdqgD3-4a1-lcPcWzpL0g6i','ANDIKRNAWAN1468':'1C69tjtFflT10ECgr8GsVstUB_cYOPnHA',
+    'APDINAAW1292':'1gX5RDkJWlmQpqxquXtCYam08f8s6pjPR','ASAD1682':'1LjrLpjFMjxPvw5_6QEHpNzobihMzDwZh',
+    'AZZAMABDUL1647':'1m8Ytc-YS97o44Bsf-gWeaK7ezPzxJGuw','DAUS1615':'13D4Xsg7NuaFzdz8CtqlpYi35gkgU8v1L',
+    'DAYAT1216':'1pPJAPAq6sd4huTRh2d34TZmPlkaEO9rT','DENNI1259':'1_-S1KkQpq-h7HYMCOzJfZGXDGTnXghvj',
+    'FANDU1196':'1_MKsvLThK1fr3JlsVVJxg8PWnXqEuMH9','FUAD1233':'1Tk00vvlb8oJenBSoPladccBMs4ElSrN3',
+    'HENDRI1551':'1LEURj690TofG7wRXdK8HE4XwO9WtB92D','LINAMAHFIROH1474':'1z5aaE-2fUFpD1Pswt0DpMc3xmZ7m-rUg',
+    'MUSLI1636':'1a7Sb3j58ZdO77lNd9iupW3rqWcWhL7BH','RAY1684':'1bRar6mpn3D_2wTFbDSHE__BtGPwiEsjx',
+    'RENALDO1368':'1rpkv3RcW8APEUay1Wd71rtQ9cMbVMRNo','RIDWAN1288':'1y1Da_v2fYkupKHKaQANxNxHSPUpduvRm',
+    'RIFAI1520':'1Y7zpXO2abifLsqKJ6qzbdbGrNfD3erhX','RIOARRIDHO1204':'1i6_4HkYaIb5Wp-uyM15Y5_tm5CXs1r1B',
+    'RIZAL1719':'1pdIk5HOWrFBKzU0cWdZnpf-xy8GuDa-U','ROIHANPRABOWO1753':'1Rdc9rYtmy-eYmqb1C7I8ttcFGd1oxPBg',
+    'SAFUAN1372':'1DjkHnM4lM_eFtSRftLEbm2uQrc_xmWqt','SATIA1764':'1jf_MaApUt7Ouehdd6W8DHsFxe798PNHu',
+    'UWAYSALL1277':'10zjIXWCoFPp5txl9_rx7Xw2VBwHdqIs9','WAHIDIN1521':'1jbdmXedf2rbCHdyMB_05CdPhKYXkg5rg',
+    'ZAINAL1022':'1eH5eIDlNB54B2AAftrxW7Su57QaRCRVo'
+  };
+  /* SE yang sudah disubmit tiap DE: [nama, folderId] */
+  var deSE = {
+    'ALDIALFIAN1205':[['Fitria','17QfBDeqVZoDP7yaESzHqCT6-SaPYOHRI'],['Ikmal','10pfGUqNfx9o0FWej-751VuYFWZgm57QV'],['Nadja','1mNFFrgLuCxvUFV65ouxi2gqADVy3NNyV'],['Humam','1bTSkN9ylGOKGKww5ys0YhYyOL9w10PzO'],['Farid','1NzozGkwDEWC3RvAW0v797BkZ8OYsMhK5']],
+    'SATIA1764':[['Syahri','1ZAd5onJLtfHPPILBBU96cCfNSvCm1ri_'],['Nabila','1XHZk5HfvSVbMMcL5OOCNMwKhsFxyR4UL'],['Justin','1HIK9e-vUnDdwZl8atgKhh1YtvX1LZZBh']],
+    'ZAINAL1022':[['Sonya Intan','1ntrsXVBLUQ_Qq8Df9tqJPtOw4r3dp-sn'],['Bayu Aditia','1cL50jhB8PTkjJv6KBdJh9t4CHeOT4_7o']],
+    'SAFUAN1372':[['Edo','1Tr5ffOKRtKLdDAyUY-0zbXZHcXjz9I9l']],
+    'MUSLI1636':[['Fadhillah Fikri','18DWgvVnhjAvutUQAlEHfB65vWe4HpoWJ']],
+    'FUAD1233':[['Willy Hamdani','1N3UbZpr8oHispQwQ1sFkVLuJYZLiSOcz']],
+    'RIOARRIDHO1204':[['Dyah Annisa L','1KY7cR6EjC41vm0nQomTrogICtsYm8VBa']]
+  };
   var deList = document.getElementById('deList');
   deIds.forEach(function(id){
     var you = id === SELF ? ' <span class="badge-you">· kamu</span>' : '';
+    var ses = deSE[id] || [];
+    var n = ses.length;
+    var folderUrl = FBASE + (DE_FOLDER[id] || '');
+    var stat = n ? '<span class="pill pill-good">Sudah submit</span>' : '<span class="pill pill-warn">Belum submit</span>';
+    var body;
+    if (n) {
+      var rows = ses.map(function(s){
+        return '<tr><td>'+s[0]+'</td><td style="text-align:right"><a class="lnk" href="'+FBASE+s[1]+'" target="_blank" rel="noopener">Buka folder →</a></td></tr>';
+      }).join('');
+      body = '<table class="ref"><thead><tr><th>Nama SE</th><th style="text-align:right">Berkas (CV &amp; Portofolio)</th></tr></thead><tbody>'+rows+'</tbody></table>'+
+        '<div class="de-actions"><a class="btn-link" href="'+folderUrl+'" target="_blank" rel="noopener">📁 Buka folder Drive DE</a></div>';
+    } else {
+      body = '<div class="de-empty">Belum ada SE yang disubmit — folder Drive masih kosong.</div>'+
+        '<a class="btn-link" href="'+folderUrl+'" target="_blank" rel="noopener">📁 Buka folder Drive DE</a>';
+    }
     var item = document.createElement('div');
     item.className = 'de-item';
     item.setAttribute('data-name', id.toLowerCase());
@@ -492,14 +537,11 @@
       '<button class="de-head" aria-expanded="false">'+
         '<span class="de-ava">'+id.slice(0,2)+'</span>'+
         '<span class="de-metablk"><span class="de-name">'+id+you+'</span><span class="de-id">Folder DE</span></span>'+
-        '<span class="de-count">0<small> SE</small></span>'+
-        '<span class="pill pill-warn">Belum submit</span>'+
+        '<span class="de-count">'+n+'<small> SE</small></span>'+
+        stat+
         '<span class="de-caret">▼</span>'+
       '</button>'+
-      '<div class="de-body">'+
-        '<div class="de-empty">Belum ada SE yang disubmit — folder Drive masih kosong.</div>'+
-        '<a class="btn-link" href="'+DRIVE_ROOT+'" target="_blank" rel="noopener">📁 Buka folder Drive DE</a>'+
-      '</div>';
+      '<div class="de-body">'+body+'</div>';
     var head = item.querySelector('.de-head');
     head.addEventListener('click', function(){
       var open = item.classList.toggle('open');
